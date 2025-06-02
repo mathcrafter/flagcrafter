@@ -1,5 +1,4 @@
 import { Colors } from '@/constants/Colors';
-import { Country } from '@/constants/flagData';
 import { AVAILABLE_REGIONS, GameSettings, QUESTION_COUNT_OPTIONS } from '@/constants/gameTypes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Haptics from 'expo-haptics';
@@ -17,14 +16,6 @@ interface GameSettingsProps {
 export function GameSettingsComponent({ settings, onSettingsChange }: GameSettingsProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
-
-    const handleDifficultyChange = (difficulty: Country['difficulty']) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        onSettingsChange({
-            ...settings,
-            difficulty,
-        });
-    };
 
     const handleRegionToggle = (region: string) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -62,78 +53,13 @@ export function GameSettingsComponent({ settings, onSettingsChange }: GameSettin
         });
     };
 
-    const getDifficultyInfo = (difficulty: Country['difficulty']) => {
-        switch (difficulty) {
-            case 'easy':
-                return { title: 'Easy', subtitle: 'Famous countries', emoji: '😊', color: colors.success };
-            case 'medium':
-                return { title: 'Medium', subtitle: 'Some tricky ones', emoji: '🤔', color: colors.warning };
-            case 'hard':
-                return { title: 'Hard', subtitle: 'Expert level', emoji: '🤓', color: colors.danger };
-        }
-    };
-
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* Difficulty Selection Section */}
-            <Animated.View
-                entering={FadeIn.delay(50).duration(500)}
-                style={styles.section}
-            >
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Difficulty Level
-                </Text>
-                <View style={styles.difficultyContainer}>
-                    {(['easy', 'medium', 'hard'] as const).map((difficulty, index) => {
-                        const info = getDifficultyInfo(difficulty);
-                        const isSelected = settings.difficulty === difficulty;
-
-                        return (
-                            <AnimatedTouchableOpacity
-                                key={difficulty}
-                                entering={SlideInDown.delay(100 + index * 100).duration(400)}
-                                style={[
-                                    styles.difficultyButton,
-                                    {
-                                        backgroundColor: isSelected ? info.color : colors.card,
-                                        borderColor: info.color,
-                                    },
-                                ]}
-                                onPress={() => handleDifficultyChange(difficulty)}
-                            >
-                                <Text style={styles.difficultyEmoji}>{info.emoji}</Text>
-                                <View style={styles.difficultyInfo}>
-                                    <Text
-                                        style={[
-                                            styles.difficultyTitle,
-                                            { color: isSelected ? colors.gameButtonText : colors.text },
-                                        ]}
-                                    >
-                                        {info.title}
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.difficultySubtitle,
-                                            { color: isSelected ? colors.gameButtonText : colors.secondary },
-                                        ]}
-                                    >
-                                        {info.subtitle}
-                                    </Text>
-                                </View>
-                                {isSelected && (
-                                    <Text style={[styles.checkmark, { color: colors.gameButtonText }]}>
-                                        ✓
-                                    </Text>
-                                )}
-                            </AnimatedTouchableOpacity>
-                        );
-                    })}
-                </View>
-            </Animated.View>
+            {/* Note: Difficulty Level selector has been REMOVED - all flags included */}
 
             {/* Question Count Section */}
             <Animated.View
-                entering={FadeIn.delay(200).duration(500)}
+                entering={FadeIn.delay(50).duration(500)}
                 style={styles.section}
             >
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -143,7 +69,7 @@ export function GameSettingsComponent({ settings, onSettingsChange }: GameSettin
                     {QUESTION_COUNT_OPTIONS.map((count, index) => (
                         <AnimatedTouchableOpacity
                             key={count}
-                            entering={SlideInDown.delay(300 + index * 50).duration(400)}
+                            entering={SlideInDown.delay(100 + index * 50).duration(400)}
                             style={[
                                 styles.questionCountButton,
                                 {
@@ -171,7 +97,7 @@ export function GameSettingsComponent({ settings, onSettingsChange }: GameSettin
 
             {/* Region Selection Section */}
             <Animated.View
-                entering={FadeIn.delay(400).duration(500)}
+                entering={FadeIn.delay(200).duration(500)}
                 style={styles.section}
             >
                 <View style={styles.regionHeader}>
@@ -180,8 +106,8 @@ export function GameSettingsComponent({ settings, onSettingsChange }: GameSettin
                     </Text>
                     <Text style={[styles.regionSubtitle, { color: colors.secondary }]}>
                         {settings.selectedRegions.length === 0
-                            ? 'All regions will be included'
-                            : `${settings.selectedRegions.length} region${settings.selectedRegions.length === 1 ? '' : 's'} selected`
+                            ? 'All regions and difficulty levels included'
+                            : `${settings.selectedRegions.length} region${settings.selectedRegions.length === 1 ? '' : 's'} selected (all difficulty levels)`
                         }
                     </Text>
                 </View>
@@ -211,7 +137,7 @@ export function GameSettingsComponent({ settings, onSettingsChange }: GameSettin
                         return (
                             <AnimatedTouchableOpacity
                                 key={region}
-                                entering={SlideInDown.delay(500 + index * 50).duration(400)}
+                                entering={SlideInDown.delay(300 + index * 50).duration(400)}
                                 style={[
                                     styles.regionButton,
                                     {
@@ -254,43 +180,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 8,
-    },
-    difficultyContainer: {
-        gap: 12,
-    },
-    difficultyButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        borderRadius: 16,
-        borderWidth: 2,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    difficultyEmoji: {
-        fontSize: 28,
-        marginRight: 16,
-    },
-    difficultyInfo: {
-        flex: 1,
-    },
-    difficultyTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    difficultySubtitle: {
-        fontSize: 14,
-        marginTop: 2,
-    },
-    checkmark: {
-        fontSize: 20,
-        fontWeight: 'bold',
     },
     regionHeader: {
         marginBottom: 16,

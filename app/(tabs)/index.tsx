@@ -25,7 +25,6 @@ export default function FlagCrafterHome() {
   const colors = Colors[colorScheme ?? 'light'];
   const [gameState, setGameState] = useState<GameState>('home');
   const [gameSettings, setGameSettings] = useState<GameSettings>({
-    difficulty: 'easy',
     selectedRegions: [],
     numberOfQuestions: DEFAULT_QUESTIONS_PER_GAME,
   });
@@ -178,12 +177,11 @@ export default function FlagCrafterHome() {
   }
 
   const getCurrentSettingsSummary = () => {
-    const difficultyMap = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
     const regionText = gameSettings.selectedRegions.length === 0
       ? 'All regions'
       : `${gameSettings.selectedRegions.length} region${gameSettings.selectedRegions.length === 1 ? '' : 's'}`;
 
-    return `${difficultyMap[gameSettings.difficulty]} • ${gameSettings.numberOfQuestions} questions • ${regionText}`;
+    return `${gameSettings.numberOfQuestions} questions • ${regionText} • All difficulty levels`;
   };
 
   return (

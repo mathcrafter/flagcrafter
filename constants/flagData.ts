@@ -379,6 +379,31 @@ export const COUNTRIES: Country[] = [
     { id: 'ca-yt', name: 'Yukon', flag: require('@/assets/images/flags-ca/yt.svg'), region: 'Canada', difficulty: 'hard' },
 ];
 
+export function getAllCountries(count?: number): Country[] {
+    const shuffled = [...COUNTRIES].sort(() => Math.random() - 0.5);
+    return count ? shuffled.slice(0, count) : shuffled;
+}
+
+export function getCountriesByRegions(
+    regions: string[],
+    count?: number
+): Country[] {
+    let filteredCountries = COUNTRIES;
+
+    // Filter by regions if specified
+    if (regions.length > 0) {
+        filteredCountries = filteredCountries.filter(country =>
+            regions.includes(country.region)
+        );
+    }
+
+    // Shuffle the results
+    const shuffled = [...filteredCountries].sort(() => Math.random() - 0.5);
+
+    // Return requested count or all if count not specified
+    return count ? shuffled.slice(0, count) : shuffled;
+}
+
 export function getRandomCountries(count: number, difficulty?: Country['difficulty']): Country[] {
     let filteredCountries = COUNTRIES;
 

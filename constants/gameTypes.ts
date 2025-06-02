@@ -13,7 +13,6 @@ export interface GameQuestion {
 }
 
 export interface GameSettings {
-    difficulty: Country['difficulty'];
     selectedRegions: string[];
     numberOfQuestions: number;
 }
@@ -25,7 +24,6 @@ export interface GameState {
     totalQuestions: number;
     gameStarted: boolean;
     gameCompleted: boolean;
-    difficulty: Country['difficulty'];
     selectedRegions: string[];
     timeStarted?: Date;
     timeCompleted?: Date;
@@ -47,7 +45,6 @@ export const INITIAL_GAME_STATE: GameState = {
     totalQuestions: 20,
     gameStarted: false,
     gameCompleted: false,
-    difficulty: 'easy',
     selectedRegions: [],
 };
 

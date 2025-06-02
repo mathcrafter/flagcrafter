@@ -63,7 +63,7 @@ export function GameScreen({ gameSettings, onGameComplete, onRestart }: GameScre
                 setSelectedAnswer(null);
                 setShowFeedback(false);
             }
-        }, 1500);
+        }, 1000);
 
         return () => clearTimeout(timer);
     };

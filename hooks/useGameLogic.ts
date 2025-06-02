@@ -1,4 +1,4 @@
-import { Country, getCountriesByRegionsAndDifficulty, getRandomCountries } from '@/constants/flagData';
+import { Country, getAllCountries, getCountriesByRegions } from '@/constants/flagData';
 import {
     GameQuestion,
     GameSettings,
@@ -20,7 +20,7 @@ export function useGameLogic() {
         // Pick a random correct answer
         const correctAnswer = countries[Math.floor(Math.random() * countries.length)];
 
-        // Get wrong answers from the same difficulty or mix of difficulties
+        // Get wrong answers from all countries
         const otherCountries = countries.filter(c => c.id !== correctAnswer.id);
         const wrongAnswers = otherCountries
             .sort(() => Math.random() - 0.5)
@@ -38,20 +38,20 @@ export function useGameLogic() {
     }, []);
 
     const startGame = useCallback((gameSettings: GameSettings) => {
-        const { difficulty, selectedRegions, numberOfQuestions } = gameSettings;
+        const { selectedRegions, numberOfQuestions } = gameSettings;
 
-        // Get countries based on selected regions and difficulty
+        // Get countries based on selected regions (all difficulty levels included)
         let countries: Country[];
         if (selectedRegions.length > 0) {
-            countries = getCountriesByRegionsAndDifficulty(selectedRegions, difficulty, numberOfQuestions * 3);
+            countries = getCountriesByRegions(selectedRegions, numberOfQuestions * 3);
         } else {
-            countries = getRandomCountries(numberOfQuestions * 3, difficulty);
+            countries = getAllCountries(numberOfQuestions * 3);
         }
 
         // Ensure we have enough countries for the game
         if (countries.length < OPTIONS_PER_QUESTION) {
-            // If not enough countries in selected regions/difficulty, fall back to all countries
-            countries = getRandomCountries(numberOfQuestions * 3, difficulty);
+            // If not enough countries in selected regions, fall back to all countries
+            countries = getAllCountries(numberOfQuestions * 3);
         }
 
         const questions: GameQuestion[] = [];
@@ -65,7 +65,6 @@ export function useGameLogic() {
         setGameState({
             ...INITIAL_GAME_STATE,
             questions,
-            difficulty,
             selectedRegions,
             gameStarted: true,
             totalQuestions: numberOfQuestions,

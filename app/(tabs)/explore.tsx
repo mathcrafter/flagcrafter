@@ -139,11 +139,6 @@ export default function ExploreScreen() {
                   >
                     {country.name}
                   </Text>
-                  <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(country.difficulty, colors) }]}>
-                    <Text style={styles.difficultyText}>
-                      {country.difficulty}
-                    </Text>
-                  </View>
                 </Animated.View>
               </TouchableOpacity>
             ))}
@@ -194,17 +189,6 @@ export default function ExploreScreen() {
                         {selectedCountry.region}
                       </Text>
                     </View>
-
-                    <View style={styles.detailRow}>
-                      <Text style={[styles.detailLabel, { color: colors.text }]}>
-                        🎯 Difficulty:
-                      </Text>
-                      <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(selectedCountry.difficulty, colors) }]}>
-                        <Text style={styles.difficultyText}>
-                          {selectedCountry.difficulty}
-                        </Text>
-                      </View>
-                    </View>
                   </View>
                 </>
               )}
@@ -214,17 +198,6 @@ export default function ExploreScreen() {
       </Modal>
     </SafeAreaView>
   );
-}
-
-function getDifficultyColor(difficulty: Country['difficulty'], colors: any) {
-  switch (difficulty) {
-    case 'easy':
-      return colors.success;
-    case 'medium':
-      return colors.warning;
-    case 'hard':
-      return colors.danger;
-  }
 }
 
 const styles = StyleSheet.create({
@@ -321,7 +294,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -338,18 +311,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     flex: 1,
     minHeight: 32,
-  },
-  difficultyBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginTop: 4,
-  },
-  difficultyText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textTransform: 'uppercase',
   },
   tipCard: {
     margin: 20,
