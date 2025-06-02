@@ -3,16 +3,19 @@ import { Colors } from '@/constants/Colors';
 import { COUNTRIES, Country, getAvailableRegions } from '@/constants/flagData';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeIn, SlideInRight } from 'react-native-reanimated';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown, FadeOutUp, SlideInRight } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedModal = Animated.createAnimatedComponent(Modal);
 
 export default function ExploreScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const dynamicRegions = getAvailableRegions();
   const regions = ['all', ...dynamicRegions];
@@ -32,6 +35,16 @@ export default function ExploreScreen() {
   };
 
   const { totalFlags, regionCounts } = getFlagStats();
+
+  const handleFlagPress = (country: Country) => {
+    setSelectedCountry(country);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedCountry(null);
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -109,29 +122,96 @@ export default function ExploreScreen() {
           </Text>
           <View style={styles.grid}>
             {filteredCountries.map((country, index) => (
-              <Animated.View
+              <TouchableOpacity
                 key={country.id}
-                entering={FadeIn.delay(1000 + index * 30)}
-                style={[styles.flagCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => handleFlagPress(country)}
+                activeOpacity={0.7}
               >
-                <FlagDisplay country={country} size="small" showBorder={false} />
-                <Text
-                  style={[styles.countryName, { color: colors.text }]}
-                  numberOfLines={2}
-                  adjustsFontSizeToFit
+                <Animated.View
+                  entering={FadeIn.delay(1000 + index * 30)}
+                  style={[styles.flagCard, { backgroundColor: colors.card, borderColor: colors.border }]}
                 >
-                  {country.name}
-                </Text>
-                <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(country.difficulty, colors) }]}>
-                  <Text style={styles.difficultyText}>
-                    {country.difficulty}
+                  <FlagDisplay country={country} size="small" showBorder={false} />
+                  <Text
+                    style={[styles.countryName, { color: colors.text }]}
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                  >
+                    {country.name}
                   </Text>
-                </View>
-              </Animated.View>
+                  <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(country.difficulty, colors) }]}>
+                    <Text style={styles.difficultyText}>
+                      {country.difficulty}
+                    </Text>
+                  </View>
+                </Animated.View>
+              </TouchableOpacity>
             ))}
           </View>
         </Animated.View>
       </ScrollView>
+
+      {/* Enlarged Flag Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeModal}>
+          <Animated.View
+            entering={FadeInDown.duration(300)}
+            exiting={FadeOutUp.duration(200)}
+            style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
+            <Pressable onPress={(e) => e.stopPropagation()}>
+              {selectedCountry && (
+                <>
+                  <View style={styles.modalHeader}>
+                    <Text style={[styles.modalTitle, { color: colors.text }]}>
+                      {selectedCountry.name}
+                    </Text>
+                    <TouchableOpacity
+                      style={[styles.closeButton, { backgroundColor: colors.primary }]}
+                      onPress={closeModal}
+                    >
+                      <Text style={[styles.closeButtonText, { color: colors.gameButtonText }]}>
+                        ✕
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.modalFlagContainer}>
+                    <FlagDisplay country={selectedCountry} size="large" showBorder={true} />
+                  </View>
+
+                  <View style={styles.modalDetails}>
+                    <View style={styles.detailRow}>
+                      <Text style={[styles.detailLabel, { color: colors.text }]}>
+                        🗺️ Region:
+                      </Text>
+                      <Text style={[styles.detailValue, { color: colors.primary }]}>
+                        {selectedCountry.region}
+                      </Text>
+                    </View>
+
+                    <View style={styles.detailRow}>
+                      <Text style={[styles.detailLabel, { color: colors.text }]}>
+                        🎯 Difficulty:
+                      </Text>
+                      <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(selectedCountry.difficulty, colors) }]}>
+                        <Text style={styles.difficultyText}>
+                          {selectedCountry.difficulty}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </>
+              )}
+            </Pressable>
+          </Animated.View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -287,5 +367,77 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 6,
     lineHeight: 22,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '90%',
+    maxWidth: 400,
+    borderRadius: 20,
+    borderWidth: 2,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    right: 0,
+    top: -4,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    lineHeight: 16,
+  },
+  modalFlagContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingVertical: 16,
+  },
+  modalDetails: {
+    gap: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  detailLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  detailValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
   },
 });
