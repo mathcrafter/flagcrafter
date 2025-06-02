@@ -1,7 +1,9 @@
 import { FlagDisplay } from '@/components/game/FlagDisplay';
 import { GameScreen } from '@/components/game/GameScreen';
+import { GameSettingsComponent } from '@/components/game/GameSettings';
 import { Colors } from '@/constants/Colors';
-import { COUNTRIES, Country } from '@/constants/flagData';
+import { COUNTRIES } from '@/constants/flagData';
+import { DEFAULT_QUESTIONS_PER_GAME, GameSettings } from '@/constants/gameTypes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Haptics from 'expo-haptics';
 import React, { useState } from 'react';
@@ -9,7 +11,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import Animated, { BounceIn, FadeIn, SlideInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type GameState = 'home' | 'playing' | 'results';
+type GameState = 'home' | 'settings' | 'playing' | 'results';
 
 interface GameResults {
   score: number;
@@ -22,17 +24,26 @@ export default function FlagCrafterHome() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [gameState, setGameState] = useState<GameState>('home');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Country['difficulty']>('easy');
+  const [gameSettings, setGameSettings] = useState<GameSettings>({
+    difficulty: 'easy',
+    selectedRegions: [],
+    numberOfQuestions: DEFAULT_QUESTIONS_PER_GAME,
+  });
   const [gameResults, setGameResults] = useState<GameResults | null>(null);
-
-  const handleDifficultySelect = (difficulty: Country['difficulty']) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSelectedDifficulty(difficulty);
-  };
 
   const handleStartGame = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setGameState('playing');
+  };
+
+  const handleShowSettings = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setGameState('settings');
+  };
+
+  const handleBackToHome = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setGameState('home');
   };
 
   const handleGameComplete = (score: number, totalQuestions: number) => {
@@ -46,15 +57,10 @@ export default function FlagCrafterHome() {
     setGameState('home');
   };
 
-  const getDifficultyInfo = (difficulty: Country['difficulty']) => {
-    switch (difficulty) {
-      case 'easy':
-        return { title: 'Easy', subtitle: 'Famous countries', emoji: '😊', color: colors.success };
-      case 'medium':
-        return { title: 'Medium', subtitle: 'Some tricky ones', emoji: '🤔', color: colors.warning };
-      case 'hard':
-        return { title: 'Hard', subtitle: 'Expert level', emoji: '🤓', color: colors.danger };
-    }
+  const handleRestartFromGame = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setGameResults(null);
+    setGameState('settings');
   };
 
   const getScoreMessage = (percentage: number) => {
@@ -74,9 +80,47 @@ export default function FlagCrafterHome() {
   if (gameState === 'playing') {
     return (
       <GameScreen
-        difficulty={selectedDifficulty}
+        gameSettings={gameSettings}
         onGameComplete={handleGameComplete}
+        onRestart={handleRestartFromGame}
       />
+    );
+  }
+
+  if (gameState === 'settings') {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.settingsHeader}>
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={handleBackToHome}
+          >
+            <Text style={[styles.backButtonText, { color: colors.text }]}>
+              ← Back
+            </Text>
+          </TouchableOpacity>
+          <Text style={[styles.settingsTitle, { color: colors.primary }]}>
+            Game Settings
+          </Text>
+        </View>
+
+        <GameSettingsComponent
+          settings={gameSettings}
+          onSettingsChange={setGameSettings}
+        />
+
+        <View style={styles.settingsFooter}>
+          <AnimatedTouchableOpacity
+            entering={BounceIn.delay(600).duration(600)}
+            style={[styles.startButton, { backgroundColor: colors.gameButton }]}
+            onPress={handleStartGame}
+          >
+            <Text style={[styles.startButtonText, { color: colors.gameButtonText }]}>
+              Start Learning! 🚀
+            </Text>
+          </AnimatedTouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -137,6 +181,15 @@ export default function FlagCrafterHome() {
     );
   }
 
+  const getCurrentSettingsSummary = () => {
+    const difficultyMap = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+    const regionText = gameSettings.selectedRegions.length === 0
+      ? 'All regions'
+      : `${gameSettings.selectedRegions.length} region${gameSettings.selectedRegions.length === 1 ? '' : 's'}`;
+
+    return `${difficultyMap[gameSettings.difficulty]} • ${gameSettings.numberOfQuestions} questions • ${regionText}`;
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -163,62 +216,40 @@ export default function FlagCrafterHome() {
 
         <Animated.View
           entering={SlideInDown.delay(400).duration(600)}
-          style={styles.difficultySection}
+          style={styles.currentSettingsCard}
         >
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Choose Your Level
+          <Text style={[styles.currentSettingsTitle, { color: colors.text }]}>
+            Current Settings
           </Text>
-
-          {(['easy', 'medium', 'hard'] as const).map((difficulty, index) => {
-            const info = getDifficultyInfo(difficulty);
-            const isSelected = selectedDifficulty === difficulty;
-
-            return (
-              <AnimatedTouchableOpacity
-                key={difficulty}
-                entering={SlideInDown.delay(600 + index * 100).duration(400)}
-                style={[
-                  styles.difficultyButton,
-                  {
-                    backgroundColor: isSelected ? info.color : colors.card,
-                    borderColor: info.color,
-                  },
-                ]}
-                onPress={() => handleDifficultySelect(difficulty)}
-              >
-                <Text style={styles.difficultyEmoji}>{info.emoji}</Text>
-                <View style={styles.difficultyInfo}>
-                  <Text
-                    style={[
-                      styles.difficultyTitle,
-                      { color: isSelected ? colors.gameButtonText : colors.text },
-                    ]}
-                  >
-                    {info.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.difficultySubtitle,
-                      { color: isSelected ? colors.gameButtonText : colors.text },
-                    ]}
-                  >
-                    {info.subtitle}
-                  </Text>
-                </View>
-              </AnimatedTouchableOpacity>
-            );
-          })}
+          <Text style={[styles.currentSettingsText, { color: colors.secondary }]}>
+            {getCurrentSettingsSummary()}
+          </Text>
         </Animated.View>
 
-        <AnimatedTouchableOpacity
-          entering={BounceIn.delay(1000).duration(600)}
-          style={[styles.startButton, { backgroundColor: colors.gameButton }]}
-          onPress={handleStartGame}
+        <Animated.View
+          entering={SlideInDown.delay(600).duration(500)}
+          style={styles.buttonContainer}
         >
-          <Text style={[styles.startButtonText, { color: colors.gameButtonText }]}>
-            Start Learning! 🚀
-          </Text>
-        </AnimatedTouchableOpacity>
+          <AnimatedTouchableOpacity
+            entering={FadeIn.delay(800).duration(400)}
+            style={[styles.settingsButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={handleShowSettings}
+          >
+            <Text style={[styles.settingsButtonText, { color: colors.text }]}>
+              ⚙️ Customize Game
+            </Text>
+          </AnimatedTouchableOpacity>
+
+          <AnimatedTouchableOpacity
+            entering={BounceIn.delay(1000).duration(600)}
+            style={[styles.startButton, { backgroundColor: colors.gameButton }]}
+            onPress={handleStartGame}
+          >
+            <Text style={[styles.startButtonText, { color: colors.gameButtonText }]}>
+              Quick Start! 🚀
+            </Text>
+          </AnimatedTouchableOpacity>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -253,22 +284,61 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 40,
   },
-  difficultySection: {
+  currentSettingsCard: {
     width: '100%',
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 16,
     marginBottom: 30,
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
+  currentSettingsTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 8,
   },
-  difficultyButton: {
+  currentSettingsText: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  settingsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  backButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginRight: 16,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  settingsTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  settingsFooter: {
     padding: 20,
-    marginVertical: 8,
-    borderRadius: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 16,
+  },
+  settingsButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 20,
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: {
@@ -279,20 +349,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  difficultyEmoji: {
-    fontSize: 32,
-    marginRight: 16,
-  },
-  difficultyInfo: {
-    flex: 1,
-  },
-  difficultyTitle: {
-    fontSize: 20,
+  settingsButtonText: {
+    fontSize: 18,
     fontWeight: 'bold',
-  },
-  difficultySubtitle: {
-    fontSize: 16,
-    marginTop: 2,
+    textAlign: 'center',
   },
   startButton: {
     paddingVertical: 16,
@@ -365,10 +425,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 40,
     lineHeight: 24,
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
   },
   playAgainButton: {
     paddingVertical: 16,

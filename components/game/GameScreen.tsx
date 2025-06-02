@@ -1,9 +1,11 @@
 import { Colors } from '@/constants/Colors';
 import { Country } from '@/constants/flagData';
+import { GameSettings } from '@/constants/gameTypes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useGameLogic } from '@/hooks/useGameLogic';
+import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInRight } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlagDisplay } from './FlagDisplay';
@@ -13,11 +15,12 @@ import { ProgressBar } from './ProgressBar';
 const { width, height } = Dimensions.get('window');
 
 interface GameScreenProps {
-    difficulty: Country['difficulty'];
+    gameSettings: GameSettings;
     onGameComplete: (score: number, totalQuestions: number) => void;
+    onRestart: () => void;
 }
 
-export function GameScreen({ difficulty, onGameComplete }: GameScreenProps) {
+export function GameScreen({ gameSettings, onGameComplete, onRestart }: GameScreenProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const {
@@ -27,14 +30,15 @@ export function GameScreen({ difficulty, onGameComplete }: GameScreenProps) {
         startGame,
         answerQuestion,
         nextQuestion,
+        restartGame,
     } = useGameLogic();
 
     const [selectedAnswer, setSelectedAnswer] = useState<Country | null>(null);
     const [showFeedback, setShowFeedback] = useState(false);
 
     useEffect(() => {
-        startGame(difficulty);
-    }, [difficulty, startGame]);
+        startGame(gameSettings);
+    }, [gameSettings, startGame]);
 
     useEffect(() => {
         if (gameState.gameCompleted) {
@@ -64,6 +68,18 @@ export function GameScreen({ difficulty, onGameComplete }: GameScreenProps) {
         return () => clearTimeout(timer);
     };
 
+    const handleRestart = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        restartGame(gameSettings);
+        setSelectedAnswer(null);
+        setShowFeedback(false);
+    };
+
+    const handleBackToSettings = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        onRestart();
+    };
+
     if (!currentQuestion || !gameState.gameStarted) {
         return (
             <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
@@ -87,18 +103,39 @@ export function GameScreen({ difficulty, onGameComplete }: GameScreenProps) {
             </Animated.View>
 
             <View style={styles.header}>
-                <Animated.Text
-                    entering={SlideInRight.duration(400)}
-                    style={[styles.questionCounter, { color: colors.text }]}
-                >
-                    Question {questionNumber} of {gameState.totalQuestions}
-                </Animated.Text>
-                <Animated.Text
-                    entering={SlideInRight.delay(100).duration(400)}
-                    style={[styles.score, { color: colors.primary }]}
-                >
-                    Score: {gameState.score}
-                </Animated.Text>
+                <View style={styles.headerLeft}>
+                    <Animated.Text
+                        entering={SlideInRight.duration(400)}
+                        style={[styles.questionCounter, { color: colors.text }]}
+                    >
+                        Question {questionNumber} of {gameState.totalQuestions}
+                    </Animated.Text>
+                    <Animated.Text
+                        entering={SlideInRight.delay(100).duration(400)}
+                        style={[styles.score, { color: colors.primary }]}
+                    >
+                        Score: {gameState.score}
+                    </Animated.Text>
+                </View>
+
+                <View style={styles.headerButtons}>
+                    <TouchableOpacity
+                        style={[styles.headerButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+                        onPress={handleRestart}
+                    >
+                        <Text style={[styles.headerButtonText, { color: colors.text }]}>
+                            🔄
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.headerButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+                        onPress={handleBackToSettings}
+                    >
+                        <Text style={[styles.headerButtonText, { color: colors.text }]}>
+                            ⚙️
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView
@@ -190,6 +227,32 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 16,
+    },
+    headerLeft: {
+        flex: 1,
+    },
+    headerButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    headerButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    headerButtonText: {
+        fontSize: 16,
     },
     questionCounter: {
         fontSize: 16,

@@ -57,9 +57,6 @@ export const COUNTRIES: Country[] = [
     { id: 'hu', name: 'Hungary', flag: require('@/assets/images/flags/hu.svg'), region: 'Europe', difficulty: 'medium' },
     { id: 'ie', name: 'Ireland', flag: require('@/assets/images/flags/ie.svg'), region: 'Europe', difficulty: 'medium' },
     { id: 'gb-eng', name: 'England', flag: require('@/assets/images/flags/gb-eng.svg'), region: 'Europe', difficulty: 'medium' },
-    { id: 'gb-nir', name: 'Northern Ireland', flag: require('@/assets/images/flags/gb-nir.svg'), region: 'Europe', difficulty: 'medium' },
-    { id: 'gb-sct', name: 'Scotland', flag: require('@/assets/images/flags/gb-sct.svg'), region: 'Europe', difficulty: 'medium' },
-    { id: 'gb-wls', name: 'Wales', flag: require('@/assets/images/flags/gb-wls.svg'), region: 'Europe', difficulty: 'medium' },
 
     // Asia - Medium
     { id: 'th', name: 'Thailand', flag: require('@/assets/images/flags/th.svg'), region: 'Asia', difficulty: 'medium' },
@@ -325,6 +322,39 @@ export function getRandomCountries(count: number, difficulty?: Country['difficul
 
     const shuffled = [...filteredCountries].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
+}
+
+export function getCountriesByRegionsAndDifficulty(
+    regions: string[],
+    difficulty?: Country['difficulty'],
+    count?: number
+): Country[] {
+    let filteredCountries = COUNTRIES;
+
+    // Filter by regions if specified
+    if (regions.length > 0) {
+        filteredCountries = filteredCountries.filter(country =>
+            regions.includes(country.region)
+        );
+    }
+
+    // Filter by difficulty if specified
+    if (difficulty) {
+        filteredCountries = filteredCountries.filter(country =>
+            country.difficulty === difficulty
+        );
+    }
+
+    // Shuffle the results
+    const shuffled = [...filteredCountries].sort(() => Math.random() - 0.5);
+
+    // Return requested count or all if count not specified
+    return count ? shuffled.slice(0, count) : shuffled;
+}
+
+export function getAvailableRegions(): string[] {
+    const regions = new Set(COUNTRIES.map(country => country.region));
+    return Array.from(regions).sort();
 }
 
 export function getCountryById(id: string): Country | undefined {

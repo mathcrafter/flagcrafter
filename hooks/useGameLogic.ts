@@ -1,11 +1,11 @@
-import { Country, getRandomCountries } from '@/constants/flagData';
+import { Country, getCountriesByRegionsAndDifficulty, getRandomCountries } from '@/constants/flagData';
 import {
     GameQuestion,
+    GameSettings,
     GameState,
     INITIAL_GAME_STATE,
     OPTIONS_PER_QUESTION,
-    QUESTIONS_PER_GAME,
-    QuestionType,
+    QuestionType
 } from '@/constants/gameTypes';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -37,11 +37,26 @@ export function useGameLogic() {
         };
     }, []);
 
-    const startGame = useCallback((difficulty: Country['difficulty'] = 'easy') => {
-        const countries = getRandomCountries(30, difficulty); // Get more countries for variety
+    const startGame = useCallback((gameSettings: GameSettings) => {
+        const { difficulty, selectedRegions, numberOfQuestions } = gameSettings;
+
+        // Get countries based on selected regions and difficulty
+        let countries: Country[];
+        if (selectedRegions.length > 0) {
+            countries = getCountriesByRegionsAndDifficulty(selectedRegions, difficulty, numberOfQuestions * 3);
+        } else {
+            countries = getRandomCountries(numberOfQuestions * 3, difficulty);
+        }
+
+        // Ensure we have enough countries for the game
+        if (countries.length < OPTIONS_PER_QUESTION) {
+            // If not enough countries in selected regions/difficulty, fall back to all countries
+            countries = getRandomCountries(numberOfQuestions * 3, difficulty);
+        }
+
         const questions: GameQuestion[] = [];
 
-        for (let i = 0; i < QUESTIONS_PER_GAME; i++) {
+        for (let i = 0; i < numberOfQuestions; i++) {
             const questionType: QuestionType = Math.random() > 0.5 ? 'flag-to-country' : 'country-to-flag';
             const question = generateQuestion(countries, questionType, `q-${i}`);
             questions.push(question);
@@ -51,8 +66,9 @@ export function useGameLogic() {
             ...INITIAL_GAME_STATE,
             questions,
             difficulty,
+            selectedRegions,
             gameStarted: true,
-            totalQuestions: QUESTIONS_PER_GAME,
+            totalQuestions: numberOfQuestions,
             timeStarted: new Date(),
         });
     }, [generateQuestion]);
@@ -97,6 +113,11 @@ export function useGameLogic() {
         setGameState(INITIAL_GAME_STATE);
     }, []);
 
+    const restartGame = useCallback((gameSettings: GameSettings) => {
+        resetGame();
+        setTimeout(() => startGame(gameSettings), 100);
+    }, [resetGame, startGame]);
+
     const currentQuestion = useMemo(() => {
         return gameState.questions[gameState.currentQuestionIndex];
     }, [gameState.questions, gameState.currentQuestionIndex]);
@@ -118,5 +139,6 @@ export function useGameLogic() {
         answerQuestion,
         nextQuestion,
         resetGame,
+        restartGame,
     };
 } 
