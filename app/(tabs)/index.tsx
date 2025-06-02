@@ -2,11 +2,11 @@ import { FlagDisplay } from '@/components/game/FlagDisplay';
 import { GameScreen } from '@/components/game/GameScreen';
 import { GameSettingsComponent } from '@/components/game/GameSettings';
 import { Colors } from '@/constants/Colors';
-import { COUNTRIES } from '@/constants/flagData';
+import { getRandomCountries } from '@/constants/flagData';
 import { DEFAULT_QUESTIONS_PER_GAME, GameSettings } from '@/constants/gameTypes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Haptics from 'expo-haptics';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { BounceIn, FadeIn, SlideInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -67,15 +67,11 @@ export default function FlagCrafterHome() {
     if (percentage >= 90) return { message: "Amazing! You're a flag expert! 🏆", emoji: "🎉" };
     if (percentage >= 70) return { message: "Great job! You know your flags! 👏", emoji: "🌟" };
     if (percentage >= 50) return { message: "Good work! Keep practicing! 💪", emoji: "👍" };
-    return { message: "Nice try! You'll do better next time! 🙂", emoji: "💙" };
+    return { message: "Nice try! You'll do better next time! 🙂", emoji: "��" };
   };
 
-  // Get sample countries from our data
-  const sampleCountries = [
-    COUNTRIES.find(c => c.id === 'us')!,
-    COUNTRIES.find(c => c.id === 'jp')!,
-    COUNTRIES.find(c => c.id === 'br')!,
-  ];
+  // Get 3 random sample countries from our data
+  const sampleCountries = useMemo(() => getRandomCountries(3), []);
 
   if (gameState === 'playing') {
     return (

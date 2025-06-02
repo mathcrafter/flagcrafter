@@ -49,24 +49,6 @@ export default function ExploreScreen() {
         </Animated.View>
 
         <Animated.View
-          entering={SlideInRight.delay(200).duration(500)}
-          style={[styles.statsCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-        >
-          <Text style={[styles.statsTitle, { color: colors.text }]}>
-            🎯 Fun Facts
-          </Text>
-          <Text style={[styles.statsText, { color: colors.text }]}>
-            • {totalFlags} flags to learn
-          </Text>
-          <Text style={[styles.statsText, { color: colors.text }]}>
-            • From {regions.length - 1} different regions
-          </Text>
-          <Text style={[styles.statsText, { color: colors.text }]}>
-            • 3 difficulty levels to master
-          </Text>
-        </Animated.View>
-
-        <Animated.View
           entering={SlideInRight.delay(400).duration(500)}
           style={styles.regionSection}
         >
@@ -148,27 +130,6 @@ export default function ExploreScreen() {
               </Animated.View>
             ))}
           </View>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeIn.delay(1200).duration(500)}
-          style={[styles.tipCard, { backgroundColor: colors.card, borderColor: colors.primary }]}
-        >
-          <Text style={[styles.tipTitle, { color: colors.primary }]}>
-            💡 Learning Tips
-          </Text>
-          <Text style={[styles.tipText, { color: colors.text }]}>
-            • Start with easy flags from famous countries
-          </Text>
-          <Text style={[styles.tipText, { color: colors.text }]}>
-            • Look for unique colors and patterns
-          </Text>
-          <Text style={[styles.tipText, { color: colors.text }]}>
-            • Practice a little bit every day
-          </Text>
-          <Text style={[styles.tipText, { color: colors.text }]}>
-            • Try to remember the flag's story
-          </Text>
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
