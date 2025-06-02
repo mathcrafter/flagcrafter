@@ -56,6 +56,10 @@ export const COUNTRIES: Country[] = [
     { id: 'cz', name: 'Czech Republic', flag: require('@/assets/images/flags/cz.svg'), region: 'Europe', difficulty: 'medium' },
     { id: 'hu', name: 'Hungary', flag: require('@/assets/images/flags/hu.svg'), region: 'Europe', difficulty: 'medium' },
     { id: 'ie', name: 'Ireland', flag: require('@/assets/images/flags/ie.svg'), region: 'Europe', difficulty: 'medium' },
+    { id: 'gb-eng', name: 'England', flag: require('@/assets/images/flags/gb-eng.svg'), region: 'Europe', difficulty: 'medium' },
+    { id: 'gb-nir', name: 'Northern Ireland', flag: require('@/assets/images/flags/gb-nir.svg'), region: 'Europe', difficulty: 'medium' },
+    { id: 'gb-sct', name: 'Scotland', flag: require('@/assets/images/flags/gb-sct.svg'), region: 'Europe', difficulty: 'medium' },
+    { id: 'gb-wls', name: 'Wales', flag: require('@/assets/images/flags/gb-wls.svg'), region: 'Europe', difficulty: 'medium' },
 
     // Asia - Medium
     { id: 'th', name: 'Thailand', flag: require('@/assets/images/flags/th.svg'), region: 'Asia', difficulty: 'medium' },
