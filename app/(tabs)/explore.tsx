@@ -1,110 +1,329 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { FlagDisplay } from '@/components/game/FlagDisplay';
+import { Colors } from '@/constants/Colors';
+import { COUNTRIES, Country } from '@/constants/flagData';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn, SlideInRight } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
+  const [selectedRegion, setSelectedRegion] = useState<string>('all');
+
+  const regions = ['all', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
+
+  const filteredCountries = selectedRegion === 'all'
+    ? COUNTRIES
+    : COUNTRIES.filter(country => country.region === selectedRegion);
+
+  const getFlagStats = () => {
+    const totalFlags = COUNTRIES.length;
+    const regionCounts = regions.slice(1).reduce((acc, region) => {
+      acc[region] = COUNTRIES.filter(c => c.region === region).length;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return { totalFlags, regionCounts };
+  };
+
+  const { totalFlags, regionCounts } = getFlagStats();
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Animated.View
+          entering={FadeIn.duration(600)}
+          style={styles.header}
+        >
+          <Text style={[styles.title, { color: colors.primary }]}>
+            🌍 Explore Flags
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.text }]}>
+            Discover flags from around the world!
+          </Text>
+        </Animated.View>
+
+        <Animated.View
+          entering={SlideInRight.delay(200).duration(500)}
+          style={[styles.statsCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+        >
+          <Text style={[styles.statsTitle, { color: colors.text }]}>
+            🎯 Fun Facts
+          </Text>
+          <Text style={[styles.statsText, { color: colors.text }]}>
+            • {totalFlags} flags to learn
+          </Text>
+          <Text style={[styles.statsText, { color: colors.text }]}>
+            • From {regions.length - 1} different regions
+          </Text>
+          <Text style={[styles.statsText, { color: colors.text }]}>
+            • 3 difficulty levels to master
+          </Text>
+        </Animated.View>
+
+        <Animated.View
+          entering={SlideInRight.delay(400).duration(500)}
+          style={styles.regionSection}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            🗺️ Choose a Region
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.regionScroll}
+          >
+            {regions.map((region, index) => (
+              <AnimatedTouchableOpacity
+                key={region}
+                entering={FadeIn.delay(600 + index * 50)}
+                style={[
+                  styles.regionButton,
+                  {
+                    backgroundColor: selectedRegion === region ? colors.primary : colors.card,
+                    borderColor: colors.border,
+                  },
+                ]}
+                onPress={() => setSelectedRegion(region)}
+              >
+                <Text
+                  style={[
+                    styles.regionText,
+                    {
+                      color: selectedRegion === region ? colors.gameButtonText : colors.text,
+                    },
+                  ]}
+                >
+                  {region === 'all' ? 'All Regions' : region}
+                </Text>
+                {region !== 'all' && (
+                  <Text
+                    style={[
+                      styles.regionCount,
+                      {
+                        color: selectedRegion === region ? colors.gameButtonText : colors.text,
+                      },
+                    ]}
+                  >
+                    {regionCounts[region]} flags
+                  </Text>
+                )}
+              </AnimatedTouchableOpacity>
+            ))}
+          </ScrollView>
+        </Animated.View>
+
+        <Animated.View
+          entering={SlideInRight.delay(800).duration(500)}
+          style={styles.flagGrid}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            {selectedRegion === 'all' ? '🏳️ All Flags' : `🏳️ Flags from ${selectedRegion}`}
+          </Text>
+          <View style={styles.grid}>
+            {filteredCountries.map((country, index) => (
+              <Animated.View
+                key={country.id}
+                entering={FadeIn.delay(1000 + index * 30)}
+                style={[styles.flagCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
+                <FlagDisplay country={country} size="small" showBorder={false} />
+                <Text
+                  style={[styles.countryName, { color: colors.text }]}
+                  numberOfLines={2}
+                  adjustsFontSizeToFit
+                >
+                  {country.name}
+                </Text>
+                <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(country.difficulty, colors) }]}>
+                  <Text style={styles.difficultyText}>
+                    {country.difficulty}
+                  </Text>
+                </View>
+              </Animated.View>
+            ))}
+          </View>
+        </Animated.View>
+
+        <Animated.View
+          entering={FadeIn.delay(1200).duration(500)}
+          style={[styles.tipCard, { backgroundColor: colors.card, borderColor: colors.primary }]}
+        >
+          <Text style={[styles.tipTitle, { color: colors.primary }]}>
+            💡 Learning Tips
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            • Start with easy flags from famous countries
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            • Look for unique colors and patterns
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            • Practice a little bit every day
+          </Text>
+          <Text style={[styles.tipText, { color: colors.text }]}>
+            • Try to remember the flag's story
+          </Text>
+        </Animated.View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
+function getDifficultyColor(difficulty: Country['difficulty'], colors: any) {
+  switch (difficulty) {
+    case 'easy':
+      return colors.success;
+    case 'medium':
+      return colors.warning;
+    case 'hard':
+      return colors.danger;
+  }
+}
+
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  header: {
+    alignItems: 'center',
+    padding: 20,
+    paddingBottom: 10,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  statsCard: {
+    margin: 20,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  statsText: {
+    fontSize: 16,
+    marginBottom: 6,
+    lineHeight: 22,
+  },
+  regionSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  regionScroll: {
+    paddingHorizontal: 20,
+    paddingRight: 40,
+  },
+  regionButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginRight: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    minWidth: 100,
+  },
+  regionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  regionCount: {
+    fontSize: 12,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  flagGrid: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  grid: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  flagCard: {
+    width: '48%',
+    aspectRatio: 1,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  countryName: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 8,
+    flex: 1,
+    minHeight: 32,
+  },
+  difficultyBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  difficultyText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+  },
+  tipCard: {
+    margin: 20,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 2,
+    marginBottom: 40,
+  },
+  tipTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  tipText: {
+    fontSize: 16,
+    marginBottom: 6,
+    lineHeight: 22,
   },
 });
