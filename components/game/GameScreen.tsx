@@ -177,7 +177,10 @@ export function GameScreen({ gameSettings, onGameComplete, onRestart }: GameScre
                     )}
                 </Animated.View>
 
-                <View style={styles.optionsContainer}>
+                <View style={[
+                    styles.optionsContainer,
+                    currentQuestion.type === 'country-to-flag' && styles.optionsContainerTwoColumn
+                ]}>
                     {currentQuestion.options.map((option, index) => (
                         <OptionButton
                             key={option.id}
@@ -189,6 +192,8 @@ export function GameScreen({ gameSettings, onGameComplete, onRestart }: GameScre
                             isCorrect={showFeedback && option.id === currentQuestion.correctAnswer.id}
                             isWrong={showFeedback && selectedAnswer?.id === option.id && option.id !== currentQuestion.correctAnswer.id}
                             showFlag={currentQuestion.type === 'country-to-flag'}
+                            showText={currentQuestion.type !== 'country-to-flag'}
+                            twoColumnLayout={currentQuestion.type === 'country-to-flag'}
                         />
                     ))}
                 </View>
@@ -286,6 +291,12 @@ const styles = StyleSheet.create({
     },
     optionsContainer: {
         marginTop: 20,
+    },
+    optionsContainerTwoColumn: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 8,
     },
     completionMessage: {
         alignItems: 'center',

@@ -18,6 +18,8 @@ interface OptionButtonProps {
     isCorrect?: boolean;
     isWrong?: boolean;
     showFlag?: boolean; // For country-to-flag questions
+    showText?: boolean; // For controlling whether to show country name
+    twoColumnLayout?: boolean; // For two-column layout in country-to-flag
 }
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
@@ -31,6 +33,8 @@ export function OptionButton({
     isCorrect = false,
     isWrong = false,
     showFlag = false,
+    showText = true,
+    twoColumnLayout = false,
 }: OptionButtonProps) {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
@@ -90,7 +94,11 @@ export function OptionButton({
     return (
         <AnimatedTouchableOpacity
             entering={SlideInLeft.delay(index * 100).duration(400).springify()}
-            style={[animatedStyle, styles.container, getButtonStyle()]}
+            style={[
+                animatedStyle,
+                twoColumnLayout ? styles.containerTwoColumn : styles.container,
+                getButtonStyle()
+            ]}
             onPress={handlePress}
             disabled={disabled}
             activeOpacity={0.8}
@@ -98,19 +106,21 @@ export function OptionButton({
             {showFlag && (
                 <Animated.View
                     entering={FadeIn.delay(index * 100 + 200)}
-                    style={styles.flagContainer}
+                    style={[styles.flagContainer, !showText && styles.flagContainerCentered]}
                 >
-                    <FlagDisplay country={option} size="small" showBorder={false} />
+                    <FlagDisplay country={option} size="medium" showBorder={false} />
                 </Animated.View>
             )}
-            <Animated.Text
-                entering={FadeIn.delay(index * 100 + 300)}
-                style={[styles.text, { color: getTextColor() }]}
-                numberOfLines={2}
-                adjustsFontSizeToFit
-            >
-                {option.name}
-            </Animated.Text>
+            {showText && (
+                <Animated.Text
+                    entering={FadeIn.delay(index * 100 + 300)}
+                    style={[styles.text, { color: getTextColor() }]}
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                >
+                    {option.name}
+                </Animated.Text>
+            )}
             {isCorrect && (
                 <Animated.Text
                     entering={FadeIn.delay(500)}
@@ -151,8 +161,34 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
+    containerTwoColumn: {
+        width: '45%',
+        marginHorizontal: 8,
+        marginVertical: 12,
+        paddingVertical: 20,
+        paddingHorizontal: 16,
+        minHeight: 120,
+        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 16,
+        borderWidth: 2,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
     flagContainer: {
         marginRight: 12,
+    },
+    flagContainerCentered: {
+        marginRight: 0,
+        flex: 1,
+        alignItems: 'center',
     },
     text: {
         flex: 1,
