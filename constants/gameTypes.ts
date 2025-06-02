@@ -64,7 +64,9 @@ export const AVAILABLE_REGIONS = [
     'Asia',
     'Africa',
     'Oceania',
-    'Antarctica'
+    'Antarctica',
+    'USA',
+    'Canada'
 ];
 
 export const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20, 25, 30]; 

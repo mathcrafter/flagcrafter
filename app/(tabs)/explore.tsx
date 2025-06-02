@@ -1,6 +1,6 @@
 import { FlagDisplay } from '@/components/game/FlagDisplay';
 import { Colors } from '@/constants/Colors';
-import { COUNTRIES, Country } from '@/constants/flagData';
+import { COUNTRIES, Country, getAvailableRegions } from '@/constants/flagData';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -14,7 +14,8 @@ export default function ExploreScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
 
-  const regions = ['all', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
+  const dynamicRegions = getAvailableRegions();
+  const regions = ['all', ...dynamicRegions];
 
   const filteredCountries = selectedRegion === 'all'
     ? COUNTRIES
@@ -22,7 +23,7 @@ export default function ExploreScreen() {
 
   const getFlagStats = () => {
     const totalFlags = COUNTRIES.length;
-    const regionCounts = regions.slice(1).reduce((acc, region) => {
+    const regionCounts = dynamicRegions.reduce((acc, region) => {
       acc[region] = COUNTRIES.filter(c => c.region === region).length;
       return acc;
     }, {} as Record<string, number>);

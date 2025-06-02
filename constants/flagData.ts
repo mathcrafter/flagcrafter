@@ -362,6 +362,21 @@ export const COUNTRIES: Country[] = [
     { id: 'us-wi', name: 'Wisconsin', flag: require('@/assets/images/flags-us/wi.svg'), region: 'USA', difficulty: 'hard' },
     { id: 'us-wv', name: 'West Virginia', flag: require('@/assets/images/flags-us/wv.svg'), region: 'USA', difficulty: 'hard' },
     { id: 'us-wy', name: 'Wyoming', flag: require('@/assets/images/flags-us/wy.svg'), region: 'USA', difficulty: 'hard' },
+
+    // Canadian Provinces and Territories - Hard
+    { id: 'ca-ab', name: 'Alberta', flag: require('@/assets/images/flags-ca/ab.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-bc', name: 'British Columbia', flag: require('@/assets/images/flags-ca/bc.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-mb', name: 'Manitoba', flag: require('@/assets/images/flags-ca/mb.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-nb', name: 'New Brunswick', flag: require('@/assets/images/flags-ca/nb.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-nl', name: 'Newfoundland and Labrador', flag: require('@/assets/images/flags-ca/nl.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-ns', name: 'Nova Scotia', flag: require('@/assets/images/flags-ca/ns.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-nt', name: 'Northwest Territories', flag: require('@/assets/images/flags-ca/nt.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-nu', name: 'Nunavut', flag: require('@/assets/images/flags-ca/nu.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-on', name: 'Ontario', flag: require('@/assets/images/flags-ca/on.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-pe', name: 'Prince Edward Island', flag: require('@/assets/images/flags-ca/pe.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-qc', name: 'Quebec', flag: require('@/assets/images/flags-ca/qc.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-sk', name: 'Saskatchewan', flag: require('@/assets/images/flags-ca/sk.svg'), region: 'Canada', difficulty: 'hard' },
+    { id: 'ca-yt', name: 'Yukon', flag: require('@/assets/images/flags-ca/yt.svg'), region: 'Canada', difficulty: 'hard' },
 ];
 
 export function getRandomCountries(count: number, difficulty?: Country['difficulty']): Country[] {
